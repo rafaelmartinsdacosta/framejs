@@ -35,7 +35,7 @@ const addClickEvent = () => {
     buttonCapture.onclick = takePicture;
     // buttonCapture.onclick = init;
   } else {
-    console.log('Botão de captura não encontrado');
+    // console.log('Botão de captura não encontrado');
   }
 };
 
@@ -106,7 +106,7 @@ const gotDevices = (deviceInfos) => {
 };
 
 const handleError = (error) => {
-  console.log(
+  console.error(
     'navigator.MediaDevices.getUserMedia error: ',
     error.message,
     error.name
@@ -144,7 +144,6 @@ const startCamera = () => {
       setConstraint(vgaConstraints);
       startCamera();
     });
-  console.log('isMobile', mobile);
 };
 
 navigator.mediaDevices.enumerateDevices().then(gotDevices).catch(handleError);
@@ -650,8 +649,6 @@ const loadMask = async () => {
     mHeight = videoHeight * (1 / 5);
     mWidth = videoWidth * (1 / 2);
   }
-
-  console.log(`video: ${videoWidth}x${videoHeight}`);
 
   let exists = document.getElementById('svgMask') !== null;
   let mBoxXCenter = mBoxWidth / 2;
