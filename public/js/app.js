@@ -7,13 +7,15 @@ let constraints = {
 };
 
 let videoOrientation;
-let videoSourceInfoId;
-let mobile;
 let track = null;
 let cameraOpen;
-let maskConfiguration;
-let creatingCanvas = false;
-let svgMask, defs, style, groupMain, groupMask, pathBackground, pathFocus;
+let svgMask;
+let defs;
+let style;
+let groupMain;
+let groupMask; 
+let pathBackground;
+let pathFocus;
 let stream;
 let aspectRatio = 1280 / 720;
 let videoWidth = 0;
@@ -34,9 +36,6 @@ const Orientation = {
 const addClickEvent = () => {
   if (buttonCapture) {
     buttonCapture.onclick = takePicture;
-    // buttonCapture.onclick = init;
-  } else {
-    // console.log('Botão de captura não encontrado');
   }
 };
 
@@ -101,17 +100,6 @@ const setAspectRatio = (constraints) => {
   }
 };
 
-const gotDevices = (deviceInfos) => {
-  for (let i = 0; i !== deviceInfos.length; ++i) {
-    const deviceInfo = deviceInfos[i];
-
-    if (deviceInfo.kind === 'videoinput') {
-      videoSourceInfoId = deviceInfo.deviceId ? deviceInfo.deviceId : undefined;
-      break;
-    }
-  }
-};
-
 const handleError = (error) => {
   console.error(
     'navigator.MediaDevices.getUserMedia error: ',
@@ -143,7 +131,6 @@ const startCamera = () => {
     .getUserMedia(getConstraints())
     .then(setMobileStyle())
     .then(gotStream)
-    .then(gotDevices)
     .then(loadMask)
     .then(calcBtnCapturePos)
     .catch(handleError)
@@ -154,7 +141,7 @@ const startCamera = () => {
     });
 };
 
-navigator.mediaDevices.enumerateDevices().then(gotDevices).catch(handleError);
+navigator.mediaDevices.enumerateDevices().catch(handleError);
 
 const setMobileStyle = () => {
   if (isMobile()) {
@@ -171,103 +158,6 @@ const newGuid = () => {
     return v.toString(16);
   });
 };
-
-/**
- * Inicializa a camera
- */
-// const configureDevice = () => {
-// navigator.mediaDevices.enumerateDevices().then(gotDevices).then(loadCamera);
-
-/**
-    navigator.mediaDevices
-        .getUserMedia(getConstraintVideo())
-        .then(function(stream) {
-            mediaStream = stream.getTracks()[0];
-            cameraVideo.srcObject = stream;
-            afterLoadCamera();
-        })
-        .catch(function(error) {
-            console.error("Oops. Something is broken.", error);
-        });
- */
-// navigator.mediaDevices
-//     .getUserMedia(constraints)
-//     .then(function(stream) {
-//         track = stream.getTracks()[0];
-//         cameraVideo.srcObject = stream;
-//         configureMask();
-//     })
-//     .catch(function(error) {
-//         console.error("Oops. Something is broken.", error);
-//     });
-// }
-
-/**
- * Abre a camera
- */
-// const loadCamera = () => {
-//     debugger
-
-//     if (videoSourceInfoId) {
-//         constraints = getConstraintVideo(videoSourceInfoId);
-//     }
-
-//     configureVideoDisplay(video, constraints);
-
-//     if (mobile) {
-//         navigator.getMedia = (navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia);
-//     } else {
-//         navigator.getWebcam = (navigator.getUserMedia || navigator.webKitGetUserMedia || navigator.moxGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia);
-//     }
-
-//     if (navigator.mediaDevices.getUserMedia) {
-//         navigator.mediaDevices.getUserMedia(constraints)
-//             .then(function(stream) {
-//                 //Definir o elemento vídeo a carregar o capturado pela webcam
-//                 if (cameraVideo.mozSrcObject !== undefined) {
-//                     cameraVideo.mozSrcObject = stream;
-//                 } else if (cameraVideo.srcObject !== undefined) {
-//                     cameraVideo.srcObject = stream;
-//                 } else {
-//                     cameraVideo.src = stream;
-//                 }
-
-//                 mediaStream = stream.getTracks()[0];
-//             })
-//             .catch(function(error) {
-//                 console.log(error);
-//                 if (navigator.getWebcam) {
-//                     navigator.getWebcam(constraints,
-//                         function(stream) {
-//                             //Display the video stream in the video object
-//                             cameraVideo.srcObject = stream;
-//                             mediaStream = stream.getTracks()[0];
-//                         },
-//                         function() {
-//                             logError("Web cam is not accessible.");
-//                         });
-//                 }
-//             });
-//     } else {
-//         navigator.getWebcam({ audio: false, video: true },
-//             function(stream) {
-//                 //Display the video stream in the video object
-//                 cameraVideo.srcObject = stream;
-//                 mediaStream = stream.getTracks()[0];
-//             },
-//             function() {
-//                 logError("Web cam is not accessible.");
-//             });
-//     }
-
-//     addEventPlay(cameraVideo);
-//     // resetVariables();
-//     initCanvas('rgb(104, 106, 110)');
-
-//     // document.getElementById('result').innerHTML = 'Abrindo câmera...';
-//     // document.getElementById('result').style.display = 'block';
-//     // document.getElementById('init').style.display = 'none';
-// }
 
 /**
  * Captura da foto
@@ -336,16 +226,12 @@ const resizeImageOut = async () => {
     cameraOutput.style.width = '100%';
     cameraOutput.style.height = '100%';
     cameraOutput.style['object-fit'] = 'cover';
+    cameraOutput.style.top = '';
+    cameraOutput.style.left = '';
   } else {
+    cameraOutput.style['object-fit'] = '';
     let currentAspectRatio = 0;
-
-    // proporção da tela
-    if (videoOrientation == Orientation.LANDSCAPE) {
-      currentAspectRatio = boxCamera.offsetWidth / boxCamera.offsetHeight;
-    } else {
-      currentAspectRatio = boxCamera.offsetHeight / boxCamera.offsetWidth;
-    }
-
+    currentAspectRatio = boxCamera.offsetWidth / boxCamera.offsetHeight;
     // faixa preta emcima e embaixo
     if (aspectRatio > currentAspectRatio) {
       videoHeight = boxCamera.offsetWidth / aspectRatio;
@@ -380,137 +266,6 @@ const calcBtnCapturePos = async () => {
   buttonCapture.style.display = 'inline-block';
 };
 
-// const getConstraintVideo = (videoSourceInfoId) => {
-//   let constraints;
-//   if (mobile) {
-//     //console.log("MOBILE");
-//     if (detectIphoneHigLevel(platform.ua)) {
-//       if (videoSourceInfoId) {
-//         constraints = {
-//           video: {
-//             deviceId: videoSourceInfoId,
-//             width: 1920,
-//             height: 1080,
-//             facingMode: 'user',
-//           },
-//           audio: false,
-//           toString: function () {
-//             return 'video';
-//           },
-//         };
-//       } else {
-//         constraints = {
-//           video: {
-//             width: 1920,
-//             height: 1080,
-//             facingMode: 'user',
-//           },
-//           audio: false,
-//           toString: function () {
-//             return 'video';
-//           },
-//         };
-//       }
-//     } else {
-//       if (videoSourceInfoId) {
-//         constraints = {
-//           video: {
-//             deviceId: videoSourceInfoId,
-//             width: {
-//               min: 480,
-//               ideal: 1280,
-//               max: getHeightResolution(),
-//             },
-//             height: {
-//               min: 480,
-//               ideal: 720,
-//               max: getWidthResolution(),
-//             },
-//             facingMode: 'user',
-//           },
-//           audio: false,
-//           toString: function () {
-//             return 'video';
-//           },
-//         };
-//       } else {
-//         constraints = {
-//           video: {
-//             width: {
-//               min: 480,
-//               ideal: 1280,
-//               max: getHeightResolution(),
-//             },
-//             height: {
-//               min: 480,
-//               ideal: 720,
-//               max: getWidthResolution(),
-//             },
-//             facingMode: 'user',
-//           },
-//           audio: false,
-//           toString: function () {
-//             return 'video';
-//           },
-//         };
-//       }
-//     }
-//   } else {
-//     //console.log("WEB");
-
-//     constraints = {
-//       video: {
-//         deviceId: videoSourceInfoId,
-//         width: {
-//           ideal: 1280,
-//         },
-//         height: {
-//           ideal: 720,
-//         },
-//         facingMode: 'user',
-//       },
-//       audio: false,
-//       toString: function () {
-//         return 'video';
-//       },
-//     };
-//   }
-
-//   return constraints;
-// };
-
-// const configureVideoDisplay = (video, constraintVideo) => {
-//   cameraVideo.style.display = 'block';
-//   //As opções abaixo são necessárias para o funcionamento correto no iOS
-//   cameraVideo.setAttribute('autoplay', '');
-//   cameraVideo.setAttribute('muted', '');
-//   cameraVideo.setAttribute('playsinline', '');
-
-//   if (mobile) {
-//     window.scrollTo(0, 0);
-//     // document.body.style.overflow = "hidden";
-//     // document.getElementById("box-liveness").style.width = screen.width + 'px';
-//     // document.getElementById("box-liveness").style.height = screen.height + 'px';
-//     cameraVideo.width = screen.width;
-//     cameraVideo.height = screen.height;
-//   } else {
-//     // document.getElementById("box-liveness").style.width = constraintVideo.video.width.ideal + 'px';
-//     // document.getElementById("box-liveness").style.height = constraintVideo.video.height.ideal + 'px';
-//     cameraVideo.width = constraintVideo.video.width.ideal;
-//     vicameraVideoeo.height = constraintVideo.video.height.ideal;
-
-//     // document.getElementById('message').style.top = `${constraintVideo.video.height.ideal / 2 - ((maskConfiguration.heightNear) / 2 + 40)}px`;
-//     // document.getElementById('result').style.bottom = `${constraintVideo.video.height.ideal / 2 - (maskConfiguration.heightNear / 2 + 40)}px`;
-//   }
-
-//   if (mobile) {
-//     mirrorScreen();
-//   }
-// };
-
-/**
- * Verifica se é um dispositivo móvel
- */
 const isMobile = () => {
   if (
     navigator.userAgent.match(/Android/i) ||
@@ -527,9 +282,6 @@ const isMobile = () => {
   }
 };
 
-/**
- * Detecta a mudanção na orientação
- */
 const orientationChange = () => {
   if (
     (screen.orientation !== null
@@ -538,15 +290,9 @@ const orientationChange = () => {
   ) {
     // Landscape
     videoOrientation = Orientation.LANDSCAPE;
-    //stopCountdown();
-    //icTake.style.opacity = '0.0';
-    //deviceRotated.style.display = 'block';
   } else {
     // Portrait
     videoOrientation = Orientation.PORTRAIT;
-    //icTake.style.opacity = '1.0';
-    //deviceRotated.style.display = 'none';
-    //showBorders();
   }
   // loadMask();
   console.log(
@@ -565,20 +311,14 @@ const addEventResize = async () => {
       resizeImageOut();
     }
     calcBtnCapturePos();
+    setMobileStyle();
   });
 };
 
 const addEventPlay = () => {
   cameraVideo.addEventListener('play', () => {
-    // const canvas = faceapi.createCanvasFromMedia(video);
-    // document.getElementById('box-liveness').append(canvas);
-
-    // const displaySize = {
-    //     width: isMobile ? screen.width : cameraVideo.width,
-    //     height: isMobile ? screen.height : cameraVideo.height
-    // };
-
     cameraOpen = true;
+    // add event after play video....
 
     // faceapi.matchDimensions(canvas, displaySize);
 
@@ -659,12 +399,7 @@ const loadMask = async () => {
       mWidth = videoWidth * (1 / 2);
     }
   } else {
-    // proporção da tela
-    if (videoOrientation == Orientation.LANDSCAPE) {
-      currentAspectRatio = cameraVideo.offsetWidth / cameraVideo.offsetHeight;
-    } else {
-      currentAspectRatio = cameraVideo.offsetHeight / cameraVideo.offsetWidth;
-    }
+    currentAspectRatio = cameraVideo.offsetWidth / cameraVideo.offsetHeight;
 
     // faixa preta emcima e embaixo
     if (aspectRatio > currentAspectRatio) {
@@ -677,13 +412,8 @@ const loadMask = async () => {
       videoWidth = cameraVideo.offsetHeight * aspectRatio;
     }
     // define a proporção da máscara em tela
-    if (videoOrientation == Orientation.LANDSCAPE) {
-      mHeight = videoHeight * (1 / 2);
-      mWidth = videoWidth * (1 / 5);
-    } else {
-      mHeight = videoHeight * (1 / 5);
-      mWidth = videoWidth * (1 / 2);
-    }
+    mHeight = videoHeight * (1 / 2);
+    mWidth = videoWidth * (1 / 5);
   }
 
   let exists = document.getElementById('svgMask') !== null;
@@ -938,19 +668,4 @@ const eightKConstraints = {
 
 window.addEventListener('orientationchange', orientationChange);
 navigator.mediaDevices.ondevicechange = orientationChange;
-
-window.onload = function () {
-  // document.getElementById('result').innerHTML = 'Carregando modelos...';
-  // document.getElementById('result').style.display = 'block';
-  // if ((mobile = isMobile())) {
-  //   document.getElementById('box-camera').style.width = screen.width + 'px';
-  //   document.getElementById('box-camera').style.height = screen.height + 'px';
-  //   // document.getElementById('message').style.top = `${screen.height / 2 - ((flow === 1 ? maskConfiguration.heightNear : maskConfiguration.heightFar) / 2 + 40)}px`;
-  //   // document.getElementById('result').style.bottom = `${screen.height / 2 - (maskConfiguration.heightNear / 2)}px`;
-  // } else {
-  //   // document.body.classList.add("body-web");
-  // }
-  // document.body.style.overflow = 'hidden';
-  init();
-};
-//window.addEventListener("load", init, false);
+window.addEventListener('load', init, false);
