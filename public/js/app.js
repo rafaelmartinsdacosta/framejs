@@ -332,42 +332,50 @@ const setVisibilityAfterTake = () => {
 };
 
 const resizeImageOut = async () => {
-  let currentAspectRatio = 0;
-
-  // proporção da tela
-  if (videoOrientation == Orientation.LANDSCAPE) {
-    currentAspectRatio = boxCamera.offsetWidth / boxCamera.offsetHeight;
+  if (isMobile()) {
+    cameraOutput.style.width = '100%';
+    cameraOutput.style.height = '100%';
+    cameraOutput.style['object-fit'] = 'cover';
   } else {
-    currentAspectRatio = boxCamera.offsetHeight / boxCamera.offsetWidth;
-  }
+    let currentAspectRatio = 0;
 
-  // faixa preta emcima e embaixo
-  if (aspectRatio > currentAspectRatio) {
-    videoHeight = boxCamera.offsetWidth / aspectRatio;
-    videoWidth = boxCamera.offsetWidth;
-  }
-  // faixa preta nas laterais
-  else {
-    videoHeight = boxCamera.offsetHeight;
-    videoWidth = boxCamera.offsetHeight * aspectRatio;
-  }
+    // proporção da tela
+    if (videoOrientation == Orientation.LANDSCAPE) {
+      currentAspectRatio = boxCamera.offsetWidth / boxCamera.offsetHeight;
+    } else {
+      currentAspectRatio = boxCamera.offsetHeight / boxCamera.offsetWidth;
+    }
 
-  // set a captured image
-  cameraOutput.style.width = videoWidth;
-  cameraOutput.style.height = videoHeight;
+    // faixa preta emcima e embaixo
+    if (aspectRatio > currentAspectRatio) {
+      videoHeight = boxCamera.offsetWidth / aspectRatio;
+      videoWidth = boxCamera.offsetWidth;
+    }
+    // faixa preta nas laterais
+    else {
+      videoHeight = boxCamera.offsetHeight;
+      videoWidth = boxCamera.offsetHeight * aspectRatio;
+    }
 
-  // ajusta a posicao (left x top)
-  if (boxCamera.offsetWidth > videoWidth) {
-    cameraOutput.style.left = (boxCamera.offsetWidth - videoWidth) / 2;
-    cameraOutput.style.top = '';
-  } else if (boxCamera.offsetHeight > videoHeight) {
-    cameraOutput.style.left = '';
-    cameraOutput.style.top = (boxCamera.offsetHeight - videoHeight) / 2;
+    // set a captured image
+    cameraOutput.style.width = videoWidth;
+    cameraOutput.style.height = videoHeight;
+
+    // ajusta a posicao (left x top)
+    if (boxCamera.offsetWidth > videoWidth) {
+      cameraOutput.style.left = (boxCamera.offsetWidth - videoWidth) / 2;
+      cameraOutput.style.top = '';
+    } else if (boxCamera.offsetHeight > videoHeight) {
+      cameraOutput.style.left = '';
+      cameraOutput.style.top = (boxCamera.offsetHeight - videoHeight) / 2;
+    }
   }
 };
 
 const calcBtnCapturePos = async () => {
-  let bottom = (boxCamera.offsetHeight - videoHeight) / 2 + 20;
+  // diferença entre o video e a area visivel (na web fica com a faixa preta caso ultrapasse a area do video)
+  let diff = boxCamera.offsetHeight - videoHeight;
+  let bottom = diff > 0 ? diff / 2 : 0 + 20;
   buttonCapture.style.bottom = `${bottom}px`;
   buttonCapture.style.display = 'inline-block';
 };
