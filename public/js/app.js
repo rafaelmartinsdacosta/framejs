@@ -5,6 +5,7 @@ let constraints = {
   },
   audio: false,
 };
+
 let videoOrientation;
 let videoSourceInfoId;
 let mobile;
@@ -54,7 +55,13 @@ const setTrack = (mediaStream) => {
 };
 
 const setConstraint = (newConstraints) => {
-  constraints = newConstraints;
+  let _constraints = {};
+  // copia os dados básicos (video.user e audio)
+  Object.assign(_constraints, constraints);
+  // copia a resolucao nova
+  Object.assign(_constraints, newConstraints);
+  // define na variavel
+  constraints = _constraints;
   setAspectRatio(constraints);
 };
 
@@ -133,7 +140,8 @@ const startCamera = () => {
   }
 
   navigator.mediaDevices
-    .getUserMedia(constraints)
+    .getUserMedia(getConstraints())
+    .then(setMobileStyle())
     .then(gotStream)
     .then(gotDevices)
     .then(loadMask)
@@ -147,6 +155,14 @@ const startCamera = () => {
 };
 
 navigator.mediaDevices.enumerateDevices().then(gotDevices).catch(handleError);
+
+const setMobileStyle = () => {
+  if (isMobile()) {
+    cameraVideo.style['object-fit'] = 'cover';
+  } else {
+    cameraVideo.style['object-fit'] = '';
+  }
+};
 
 const newGuid = () => {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
@@ -356,133 +372,133 @@ const calcBtnCapturePos = async () => {
   buttonCapture.style.display = 'inline-block';
 };
 
-const getConstraintVideo = (videoSourceInfoId) => {
-  let constraints;
-  if (mobile) {
-    //console.log("MOBILE");
-    if (detectIphoneHigLevel(platform.ua)) {
-      if (videoSourceInfoId) {
-        constraints = {
-          video: {
-            deviceId: videoSourceInfoId,
-            width: 1920,
-            height: 1080,
-            facingMode: 'user',
-          },
-          audio: false,
-          toString: function () {
-            return 'video';
-          },
-        };
-      } else {
-        constraints = {
-          video: {
-            width: 1920,
-            height: 1080,
-            facingMode: 'user',
-          },
-          audio: false,
-          toString: function () {
-            return 'video';
-          },
-        };
-      }
-    } else {
-      if (videoSourceInfoId) {
-        constraints = {
-          video: {
-            deviceId: videoSourceInfoId,
-            width: {
-              min: 480,
-              ideal: 1280,
-              max: getHeightResolution(),
-            },
-            height: {
-              min: 480,
-              ideal: 720,
-              max: getWidthResolution(),
-            },
-            facingMode: 'user',
-          },
-          audio: false,
-          toString: function () {
-            return 'video';
-          },
-        };
-      } else {
-        constraints = {
-          video: {
-            width: {
-              min: 480,
-              ideal: 1280,
-              max: getHeightResolution(),
-            },
-            height: {
-              min: 480,
-              ideal: 720,
-              max: getWidthResolution(),
-            },
-            facingMode: 'user',
-          },
-          audio: false,
-          toString: function () {
-            return 'video';
-          },
-        };
-      }
-    }
-  } else {
-    //console.log("WEB");
+// const getConstraintVideo = (videoSourceInfoId) => {
+//   let constraints;
+//   if (mobile) {
+//     //console.log("MOBILE");
+//     if (detectIphoneHigLevel(platform.ua)) {
+//       if (videoSourceInfoId) {
+//         constraints = {
+//           video: {
+//             deviceId: videoSourceInfoId,
+//             width: 1920,
+//             height: 1080,
+//             facingMode: 'user',
+//           },
+//           audio: false,
+//           toString: function () {
+//             return 'video';
+//           },
+//         };
+//       } else {
+//         constraints = {
+//           video: {
+//             width: 1920,
+//             height: 1080,
+//             facingMode: 'user',
+//           },
+//           audio: false,
+//           toString: function () {
+//             return 'video';
+//           },
+//         };
+//       }
+//     } else {
+//       if (videoSourceInfoId) {
+//         constraints = {
+//           video: {
+//             deviceId: videoSourceInfoId,
+//             width: {
+//               min: 480,
+//               ideal: 1280,
+//               max: getHeightResolution(),
+//             },
+//             height: {
+//               min: 480,
+//               ideal: 720,
+//               max: getWidthResolution(),
+//             },
+//             facingMode: 'user',
+//           },
+//           audio: false,
+//           toString: function () {
+//             return 'video';
+//           },
+//         };
+//       } else {
+//         constraints = {
+//           video: {
+//             width: {
+//               min: 480,
+//               ideal: 1280,
+//               max: getHeightResolution(),
+//             },
+//             height: {
+//               min: 480,
+//               ideal: 720,
+//               max: getWidthResolution(),
+//             },
+//             facingMode: 'user',
+//           },
+//           audio: false,
+//           toString: function () {
+//             return 'video';
+//           },
+//         };
+//       }
+//     }
+//   } else {
+//     //console.log("WEB");
 
-    constraints = {
-      video: {
-        deviceId: videoSourceInfoId,
-        width: {
-          ideal: 1280,
-        },
-        height: {
-          ideal: 720,
-        },
-        facingMode: 'user',
-      },
-      audio: false,
-      toString: function () {
-        return 'video';
-      },
-    };
-  }
+//     constraints = {
+//       video: {
+//         deviceId: videoSourceInfoId,
+//         width: {
+//           ideal: 1280,
+//         },
+//         height: {
+//           ideal: 720,
+//         },
+//         facingMode: 'user',
+//       },
+//       audio: false,
+//       toString: function () {
+//         return 'video';
+//       },
+//     };
+//   }
 
-  return constraints;
-};
+//   return constraints;
+// };
 
-const configureVideoDisplay = (video, constraintVideo) => {
-  cameraVideo.style.display = 'block';
-  //As opções abaixo são necessárias para o funcionamento correto no iOS
-  cameraVideo.setAttribute('autoplay', '');
-  cameraVideo.setAttribute('muted', '');
-  cameraVideo.setAttribute('playsinline', '');
+// const configureVideoDisplay = (video, constraintVideo) => {
+//   cameraVideo.style.display = 'block';
+//   //As opções abaixo são necessárias para o funcionamento correto no iOS
+//   cameraVideo.setAttribute('autoplay', '');
+//   cameraVideo.setAttribute('muted', '');
+//   cameraVideo.setAttribute('playsinline', '');
 
-  if (mobile) {
-    window.scrollTo(0, 0);
-    // document.body.style.overflow = "hidden";
-    // document.getElementById("box-liveness").style.width = screen.width + 'px';
-    // document.getElementById("box-liveness").style.height = screen.height + 'px';
-    cameraVideo.width = screen.width;
-    cameraVideo.height = screen.height;
-  } else {
-    // document.getElementById("box-liveness").style.width = constraintVideo.video.width.ideal + 'px';
-    // document.getElementById("box-liveness").style.height = constraintVideo.video.height.ideal + 'px';
-    cameraVideo.width = constraintVideo.video.width.ideal;
-    vicameraVideoeo.height = constraintVideo.video.height.ideal;
+//   if (mobile) {
+//     window.scrollTo(0, 0);
+//     // document.body.style.overflow = "hidden";
+//     // document.getElementById("box-liveness").style.width = screen.width + 'px';
+//     // document.getElementById("box-liveness").style.height = screen.height + 'px';
+//     cameraVideo.width = screen.width;
+//     cameraVideo.height = screen.height;
+//   } else {
+//     // document.getElementById("box-liveness").style.width = constraintVideo.video.width.ideal + 'px';
+//     // document.getElementById("box-liveness").style.height = constraintVideo.video.height.ideal + 'px';
+//     cameraVideo.width = constraintVideo.video.width.ideal;
+//     vicameraVideoeo.height = constraintVideo.video.height.ideal;
 
-    // document.getElementById('message').style.top = `${constraintVideo.video.height.ideal / 2 - ((maskConfiguration.heightNear) / 2 + 40)}px`;
-    // document.getElementById('result').style.bottom = `${constraintVideo.video.height.ideal / 2 - (maskConfiguration.heightNear / 2 + 40)}px`;
-  }
+//     // document.getElementById('message').style.top = `${constraintVideo.video.height.ideal / 2 - ((maskConfiguration.heightNear) / 2 + 40)}px`;
+//     // document.getElementById('result').style.bottom = `${constraintVideo.video.height.ideal / 2 - (maskConfiguration.heightNear / 2 + 40)}px`;
+//   }
 
-  if (mobile) {
-    mirrorScreen();
-  }
-};
+//   if (mobile) {
+//     mirrorScreen();
+//   }
+// };
 
 /**
  * Verifica se é um dispositivo móvel
@@ -506,29 +522,30 @@ const isMobile = () => {
 /**
  * Detecta a mudanção na orientação
  */
-// const orientationChange = () => {
-//   if (
-//     (screen.orientation !== null
-//       ? screen.orientation.angle
-//       : Math.abs(window.orientation)) !== 0
-//   ) {
-//     // Landscape
-//     videoOrientation = Orientation.LANDSCAPE;
-//     //stopCountdown();
-//     //icTake.style.opacity = '0.0';
-//     //deviceRotated.style.display = 'block';
-//   } else {
-//     // Portrait
-//     videoOrientation = Orientation.PORTRAIT;
-//     //icTake.style.opacity = '1.0';
-//     //deviceRotated.style.display = 'none';
-//     //showBorders();
-//   }
-//   console.log(
-//     'videoMode' +
-//       (videoOrientation == Orientation.LANDSCAPE ? 'LANDSCAPE' : 'PORTRAIT')
-//   );
-// };
+const orientationChange = () => {
+  if (
+    (screen.orientation !== null
+      ? screen.orientation.angle
+      : Math.abs(window.orientation)) !== 0
+  ) {
+    // Landscape
+    videoOrientation = Orientation.LANDSCAPE;
+    //stopCountdown();
+    //icTake.style.opacity = '0.0';
+    //deviceRotated.style.display = 'block';
+  } else {
+    // Portrait
+    videoOrientation = Orientation.PORTRAIT;
+    //icTake.style.opacity = '1.0';
+    //deviceRotated.style.display = 'none';
+    //showBorders();
+  }
+  // loadMask();
+  console.log(
+    'videoMode' +
+      (videoOrientation == Orientation.LANDSCAPE ? 'LANDSCAPE' : 'PORTRAIT')
+  );
+};
 
 const addEventResize = async () => {
   window.addEventListener('resize', (e) => {
@@ -623,31 +640,42 @@ const loadMask = async () => {
 
   let currentAspectRatio = 0;
 
-  // proporção da tela
-  if (videoOrientation == Orientation.LANDSCAPE) {
-    currentAspectRatio = cameraVideo.offsetWidth / cameraVideo.offsetHeight;
-  } else {
-    currentAspectRatio = cameraVideo.offsetHeight / cameraVideo.offsetWidth;
-  }
-
-  // faixa preta emcima e embaixo
-  if (aspectRatio > currentAspectRatio) {
-    videoHeight = cameraVideo.offsetWidth / aspectRatio;
+  if (isMobile()) {
     videoWidth = cameraVideo.offsetWidth;
-  }
-  // faixa preta nas laterais
-  else {
     videoHeight = cameraVideo.offsetHeight;
-    videoWidth = cameraVideo.offsetHeight * aspectRatio;
-  }
-
-  // define a proporção da máscara em tela
-  if (videoOrientation == Orientation.LANDSCAPE) {
-    mHeight = videoHeight * (1 / 2);
-    mWidth = videoWidth * (1 / 5);
+    if (videoOrientation == Orientation.LANDSCAPE) {
+      mHeight = videoHeight * (1 / 2);
+      mWidth = videoWidth * (1 / 5);
+    } else {
+      mHeight = videoHeight * (1 / 2);
+      mWidth = videoWidth * (1 / 2);
+    }
   } else {
-    mHeight = videoHeight * (1 / 5);
-    mWidth = videoWidth * (1 / 2);
+    // proporção da tela
+    if (videoOrientation == Orientation.LANDSCAPE) {
+      currentAspectRatio = cameraVideo.offsetWidth / cameraVideo.offsetHeight;
+    } else {
+      currentAspectRatio = cameraVideo.offsetHeight / cameraVideo.offsetWidth;
+    }
+
+    // faixa preta emcima e embaixo
+    if (aspectRatio > currentAspectRatio) {
+      videoHeight = cameraVideo.offsetWidth / aspectRatio;
+      videoWidth = cameraVideo.offsetWidth;
+    }
+    // faixa preta nas laterais
+    else {
+      videoHeight = cameraVideo.offsetHeight;
+      videoWidth = cameraVideo.offsetHeight * aspectRatio;
+    }
+    // define a proporção da máscara em tela
+    if (videoOrientation == Orientation.LANDSCAPE) {
+      mHeight = videoHeight * (1 / 2);
+      mWidth = videoWidth * (1 / 5);
+    } else {
+      mHeight = videoHeight * (1 / 5);
+      mWidth = videoWidth * (1 / 2);
+    }
   }
 
   let exists = document.getElementById('svgMask') !== null;
@@ -802,18 +830,14 @@ const init = () => {
 };
 
 const setOrientation = () => {
-  if (isMobile()) {
-    console.error('IMPLEMENTAR ORIETACAO MOBILE');
+  if (
+    (window.screen.orientation &&
+      window.screen.orientation.type == 'landscape-primary') ||
+    window.screen.orientation.type == 'landscape-secondary'
+  ) {
+    videoOrientation = Orientation.LANDSCAPE;
   } else {
-    if (
-      (window.screen.orientation &&
-        window.screen.orientation.type == 'landscape-primary') ||
-      window.screen.orientation.type == 'landscape-secondary'
-    ) {
-      videoOrientation = Orientation.LANDSCAPE;
-    } else {
-      videoOrientation = Orientation.PORTRAIT;
-    }
+    videoOrientation = Orientation.PORTRAIT;
   }
 };
 
@@ -827,11 +851,15 @@ const getMedia = (constraints) => {
   clearErrorMessage();
   videoblock.style.display = 'none';
   navigator.mediaDevices
-    .getUserMedia(constraints)
+    .getUserMedia(getConstraints())
     .then(gotStream)
     .catch((e) => {
       errorMessage('getUserMedia', e.message, e.name);
     });
+};
+
+const getConstraints = () => {
+  return constraints;
 };
 
 const qvgaConstraints = {
@@ -900,7 +928,9 @@ const eightKConstraints = {
   },
 };
 
-// window.addEventListener('orientationchange', orientationChange);
+window.addEventListener('orientationchange', orientationChange);
+navigator.mediaDevices.ondevicechange = orientationChange;
+
 window.onload = function () {
   // document.getElementById('result').innerHTML = 'Carregando modelos...';
   // document.getElementById('result').style.display = 'block';
