@@ -13,7 +13,7 @@ let svgMask;
 let defs;
 let style;
 let groupMain;
-let groupMask; 
+let groupMask;
 let pathBackground;
 let pathFocus;
 let stream;
@@ -21,11 +21,17 @@ let aspectRatio = 1280 / 720;
 let videoWidth = 0;
 let videoHeight = 0;
 
+// video da abertura da câmera
 const cameraVideo = document.querySelector('#camera--video');
+// imagem capturada
 const cameraOutput = document.querySelector('#camera--output');
+// canvas utilizado na captura
 const cameraCanvas = document.querySelector('#camera--canvas');
+// botão de captura
 const buttonCapture = document.querySelector('#camera--trigger');
+// loading
 const boxLoading = document.querySelector('#box--loading');
+// box da câmera
 const boxCamera = document.querySelector('#box-camera');
 
 const Orientation = {
@@ -40,28 +46,45 @@ const addClickEvent = () => {
 };
 
 const gotStream = (mediaStream) => {
-  // make stream available to console
-  stream = window.stream = mediaStream;
-  cameraVideo.srcObject = mediaStream;
-  setTrack(mediaStream);
-  // Refresh button list in case labels have become available
+  if (mediaStream) {
+    // make stream available to console
+    stream = window.stream = mediaStream;
+    cameraVideo.srcObject = mediaStream;
+    setTrack(mediaStream);
+    // Refresh button list in case labels have become available
+  }
   return navigator.mediaDevices.enumerateDevices();
 };
 
+const gotDevices = (deviceInfos) => {
+  for (let i = 0; i !== deviceInfos.length; ++i) {
+    const deviceInfo = deviceInfos[i];
+
+    if (deviceInfo.kind === 'videoinput') {
+      videoSourceInfoId = deviceInfo.deviceId ? deviceInfo.deviceId : undefined;
+      break;
+    }
+  }
+};
+
 const setTrack = (mediaStream) => {
-  track = mediaStream.getVideoTracks()[0];
-  setConstraint(track.getConstraints());
+  if (mediaStream) {
+    track = mediaStream.getVideoTracks()[0];
+    setConstraint(track.getConstraints());
+  }
 };
 
 const setConstraint = (newConstraints) => {
-  let _constraints = {};
-  // copia os dados básicos (video.user e audio)
-  Object.assign(_constraints, constraints);
-  // copia a resolucao nova
-  Object.assign(_constraints, newConstraints);
-  // define na variavel
-  constraints = _constraints;
-  setAspectRatio(constraints);
+  if (newConstraints) {
+    let _constraints = {};
+    // copia os dados básicos (video.user e audio)
+    Object.assign(_constraints, constraints);
+    // copia a resolucao nova
+    Object.assign(_constraints, newConstraints);
+    // define na variavel
+    constraints = _constraints;
+    setAspectRatio(constraints);
+  }
 };
 
 const setAspectRatio = (constraints) => {
@@ -101,11 +124,23 @@ const setAspectRatio = (constraints) => {
 };
 
 const handleError = (error) => {
-  console.error(
-    'navigator.MediaDevices.getUserMedia error: ',
-    error.message,
-    error.name
-  );
+  if (error) {
+    console.error(
+      'navigator.MediaDevices.getUserMedia error: ',
+      error.message,
+      error.name
+    );
+  } else {
+    console.error('Ooopss algo deu errado na abertura da câmera');
+  }
+};
+
+const setMobileStyle = () => {
+  if (isMobile()) {
+    cameraVideo.style['object-fit'] = 'cover';
+  } else {
+    cameraVideo.style['object-fit'] = '';
+  }
 };
 
 const startCamera = () => {
@@ -129,8 +164,9 @@ const startCamera = () => {
 
   navigator.mediaDevices
     .getUserMedia(getConstraints())
-    .then(setMobileStyle)
+    .then(setMobileStyle())
     .then(gotStream)
+    .then(gotDevices)
     .then(loadMask)
     .then(calcBtnCapturePos)
     .catch(handleError)
@@ -142,14 +178,6 @@ const startCamera = () => {
 };
 
 navigator.mediaDevices.enumerateDevices().catch(handleError);
-
-const setMobileStyle = () => {
-  if (isMobile()) {
-    cameraVideo.style['object-fit'] = 'cover';
-  } else {
-    cameraVideo.style['object-fit'] = '';
-  }
-};
 
 const newGuid = () => {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
@@ -283,18 +311,7 @@ const isMobile = () => {
 };
 
 const orientationChange = () => {
-  if (
-    (screen.orientation !== null
-      ? screen.orientation.angle
-      : Math.abs(window.orientation)) !== 0
-  ) {
-    // Landscape
-    videoOrientation = Orientation.LANDSCAPE;
-  } else {
-    // Portrait
-    videoOrientation = Orientation.PORTRAIT;
-  }
-  // loadMask();
+  setOrientation();
   console.log(
     'videoMode' +
       (videoOrientation == Orientation.LANDSCAPE ? 'LANDSCAPE' : 'PORTRAIT')
@@ -568,14 +585,28 @@ const init = () => {
 };
 
 const setOrientation = () => {
-  if (
-    (window.screen.orientation &&
-      window.screen.orientation.type == 'landscape-primary') ||
-    window.screen.orientation.type == 'landscape-secondary'
-  ) {
-    videoOrientation = Orientation.LANDSCAPE;
+  let orientation =
+    (screen.orientation || {}).type ||
+    screen.mozOrientation ||
+    screen.msOrientation;
+
+  // se tem o parametro orientation (chrome, explorer ou mozilla)
+  if (orientation) {
+    if (
+      orientation == 'landscape-primary' ||
+      orientation == 'landscape-secondary'
+    ) {
+      videoOrientation = Orientation.LANDSCAPE;
+    } else {
+      videoOrientation = Orientation.PORTRAIT;
+    }
   } else {
-    videoOrientation = Orientation.PORTRAIT;
+    // caso não exista, possivelmente Safari
+    if (screen.width > screen.height) {
+      videoOrientation = Orientation.LANDSCAPE;
+    } else {
+      videoOrientation = Orientation.PORTRAIT;
+    }
   }
 };
 
