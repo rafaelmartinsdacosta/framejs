@@ -129,7 +129,7 @@ const startCamera = () => {
 
   navigator.mediaDevices
     .getUserMedia(getConstraints())
-    .then(setMobileStyle())
+    .then(setMobileStyle)
     .then(gotStream)
     .then(loadMask)
     .then(calcBtnCapturePos)
