@@ -125,13 +125,13 @@ const setAspectRatio = (constraints) => {
 
 const handleError = (error) => {
   if (error) {
-    console.error(
+    console.log(
       'navigator.MediaDevices.getUserMedia error: ',
       error.message,
       error.name
     );
   } else {
-    console.error('Ooopss algo deu errado na abertura da câmera');
+    console.log('Ooopss algo deu errado na abertura da câmera');
   }
 };
 
@@ -169,8 +169,8 @@ const startCamera = () => {
     .then(gotDevices)
     .then(loadMask)
     .then(calcBtnCapturePos)
-    .catch(handleError)
-    .catch(() => {
+    .catch((error) => {
+      handleError(error);
       // abaixa a resolução de abertura da camera
       setConstraint(vgaConstraints);
       startCamera();
