@@ -312,10 +312,6 @@ const isMobile = () => {
 
 const orientationChange = () => {
   setOrientation();
-  console.log(
-    'videoMode' +
-      (videoOrientation == Orientation.LANDSCAPE ? 'LANDSCAPE' : 'PORTRAIT')
-  );
 };
 
 const addEventResize = async () => {
