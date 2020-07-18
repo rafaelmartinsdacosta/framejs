@@ -474,11 +474,18 @@ const loadMask = async () => {
   }
 
   // mask proportion
-  if (isMobile() && videoOrientation == Orientation.PORTRAIT) {
-    mHeight = videoHeight * 0.5;
-    mWidth = videoWidth * 0.55;
-  }
-  else {
+  if (isMobile()) {
+    if (videoOrientation == Orientation.PORTRAIT) {
+      mHeight = videoHeight * 0.5;
+      mWidth = videoWidth * 0.55;
+    } else if (isSafari) {
+      mHeight = videoHeight * 0.6;
+      mWidth = videoWidth * 0.3;
+    } else {
+      mHeight = videoHeight * 0.5;
+      mWidth = videoWidth * 0.2;
+    }
+  } else {
     mHeight = videoHeight * 0.5;
     mWidth = videoWidth * 0.2;
   }
