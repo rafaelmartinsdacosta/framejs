@@ -21,6 +21,11 @@ let stream;
 let aspectRatio = 1280 / 720;
 let videoWidth = 0;
 let videoHeight = 0;
+let mWidth = 0;
+let mHeight = 0;
+let resolutionWidth = 1280;
+let resolutionHeight = 720;
+
 // Opera 8.0+
 const isOpera =
   (!!window.opr && !!opr.addons) ||
@@ -69,7 +74,7 @@ const boxLoading = document.querySelector('#box--loading');
 // box da câmera
 const boxCamera = document.querySelector('#box-camera');
 
-const isMobile =
+const isMobile = () =>
   navigator.userAgent.match(/Android/i) ||
   navigator.userAgent.match(/webOS/i) ||
   navigator.userAgent.match(/iPhone/i) ||
@@ -117,9 +122,11 @@ const setTrack = (mediaStream) => {
   if (mediaStream) {
     track = mediaStream.getVideoTracks()[0];
     if (track.getSettings()) {
+      resolutionWidth = track.getSettings().width;
+      resolutionHeight = track.getSettings().height;
       console.log(
         'resolucao de abertura:',
-        `${track.getSettings().width}x${track.getSettings().height}`
+        `${resolutionWidth}x${resolutionHeight}`
       );
     }
     setConstraint(track.getConstraints());
@@ -188,7 +195,7 @@ const handleError = (error) => {
 };
 
 const setMobileStyle = () => {
-  if (isMobile) {
+  if (isMobile()) {
     cameraVideo.style['object-fit'] = 'cover';
   } else {
     cameraVideo.style['object-fit'] = '';
@@ -308,7 +315,7 @@ const setVisibilityAfterTake = () => {
 };
 
 const resizeImageOut = async () => {
-  if (isMobile) {
+  if (isMobile()) {
     cameraOutput.style.width = '100%';
     cameraOutput.style.height = '100%';
     cameraOutput.style['object-fit'] = 'cover';
@@ -440,8 +447,6 @@ const loadMask = async () => {
   // parameters -----------------------------------
   let mBoxWidth = cameraVideo.offsetWidth;
   let mBoxHeight = cameraVideo.offsetHeight;
-  let mWidth = 0;
-  let mHeight = 0;
   let borderColor = '#fff';
   let borderWidth = 5;
   let backgroundOpacity = '0.7';
@@ -449,20 +454,14 @@ const loadMask = async () => {
 
   let currentAspectRatio = 0;
 
-  if (mBoxWidth > videoHeight) {
+  if (mBoxWidth > mBoxHeight) {
     videoOrientation = Orientation.LANDSCAPE;
   }
 
-  if (isMobile) {
+  // video proportion
+  if (isMobile()) {
     videoWidth = cameraVideo.offsetWidth;
     videoHeight = cameraVideo.offsetHeight;
-    if (videoOrientation == Orientation.LANDSCAPE) {
-      mHeight = videoHeight * 0.5;
-      mWidth = videoWidth * 0.18;
-    } else {
-      mHeight = videoHeight * 0.5;
-      mWidth = videoWidth * 0.55;
-    }
   } else {
     currentAspectRatio = cameraVideo.offsetWidth / cameraVideo.offsetHeight;
 
@@ -476,9 +475,16 @@ const loadMask = async () => {
       videoHeight = cameraVideo.offsetHeight;
       videoWidth = cameraVideo.offsetHeight * aspectRatio;
     }
-    // define a proporção da máscara em tela
-    mHeight = videoHeight * (1 / 2);
-    mWidth = videoWidth * (1 / 5);
+  }
+
+  // mask proportion
+  if (isMobile() && videoOrientation == Orientation.PORTRAIT) {
+    mHeight = videoHeight * 0.5;
+    mWidth = videoWidth * 0.55;
+  }
+  else {
+    mHeight = videoHeight * 0.5;
+    mWidth = videoWidth * 0.2;
   }
 
   let exists = document.getElementById('svgMask') !== null;
