@@ -617,6 +617,7 @@ body {
     transform: scaleX(-1);
     filter: FlipH;
     display: block;
+    margin: auto;
     position: absolute;
 }
 

@@ -18,7 +18,7 @@ let groupMask;
 let pathBackground;
 let pathFocus;
 let stream;
-let aspectRatio = 1280 / 720;
+let aspectRatioVideo = 1280 / 720;
 let videoWidth = 0;
 let videoHeight = 0;
 let mWidth = 0;
@@ -169,11 +169,11 @@ const setAspectRatio = (constraints) => {
   if (width && height) {
     // landscape
     if (width > height) {
-      aspectRatio = width / height;
+      aspectRatioVideo = width / height;
     }
     // portrait
     else {
-      aspectRatio = height / width;
+      aspectRatioVideo = height / width;
     }
   }
 };
@@ -319,22 +319,23 @@ const resizeImageOut = async () => {
     cameraOutput.style.left = '';
   } else {
     cameraOutput.style['object-fit'] = '';
-    let currentAspectRatio = 0;
-    currentAspectRatio = boxCamera.offsetWidth / boxCamera.offsetHeight;
+    let aspectRatioScreen = 0;
+    aspectRatioScreen = boxCamera.offsetWidth / boxCamera.offsetHeight;
+
     // faixa preta emcima e embaixo
-    if (aspectRatio > currentAspectRatio) {
-      videoHeight = boxCamera.offsetWidth / aspectRatio;
+    if (aspectRatioVideo > aspectRatioScreen) {
+      videoHeight = boxCamera.offsetWidth / aspectRatioVideo;
       videoWidth = boxCamera.offsetWidth;
     }
     // faixa preta nas laterais
     else {
       videoHeight = boxCamera.offsetHeight;
-      videoWidth = boxCamera.offsetHeight * aspectRatio;
+      videoWidth = boxCamera.offsetHeight * aspectRatioVideo;
     }
 
     // set a captured image
-    cameraOutput.style.width = videoWidth;
-    cameraOutput.style.height = videoHeight;
+    // cameraOutput.style.width = videoWidth;
+    // cameraOutput.style.height = videoHeight;
 
     // ajusta a posicao (left x top)
     if (boxCamera.offsetWidth > videoWidth) {
@@ -343,6 +344,20 @@ const resizeImageOut = async () => {
     } else if (boxCamera.offsetHeight > videoHeight) {
       cameraOutput.style.left = '';
       cameraOutput.style.top = (boxCamera.offsetHeight - videoHeight) / 2;
+    }
+
+    let aspectRatioImg = cameraOutput.offsetWidth / cameraOutput.offsetHeight;
+
+    // faixa preta emcima e embaixo
+    if (aspectRatioImg > aspectRatioScreen) {
+      // set a captured image
+      cameraOutput.style.width = videoWidth;
+      cameraOutput.style.height = null;
+    }
+    // faixa preta nas laterais
+    else {
+      cameraOutput.style.width = null;
+      cameraOutput.style.height = videoHeight;
     }
   }
 };
@@ -357,7 +372,7 @@ const calcBtnCapturePos = async () => {
 
 const orientationChange = () => {
   setOrientation();
-  window.scrollTo(0,document.body.scrollHeight);
+  window.scrollTo(0, document.body.scrollHeight);
   updateView();
 };
 
@@ -463,14 +478,14 @@ const loadMask = async () => {
     currentAspectRatio = cameraVideo.offsetWidth / cameraVideo.offsetHeight;
 
     // faixa preta emcima e embaixo
-    if (aspectRatio > currentAspectRatio) {
-      videoHeight = cameraVideo.offsetWidth / aspectRatio;
+    if (aspectRatioVideo > currentAspectRatio) {
+      videoHeight = cameraVideo.offsetWidth / aspectRatioVideo;
       videoWidth = cameraVideo.offsetWidth;
     }
     // faixa preta nas laterais
     else {
       videoHeight = cameraVideo.offsetHeight;
-      videoWidth = cameraVideo.offsetHeight * aspectRatio;
+      videoWidth = cameraVideo.offsetHeight * aspectRatioVideo;
     }
   }
 
@@ -479,10 +494,10 @@ const loadMask = async () => {
     if (videoOrientation == Orientation.PORTRAIT) {
       mHeight = videoHeight * 0.5;
       mWidth = videoWidth * 0.55;
-    } else if (isSafari) {
+    } /*else if (isSafari) {
       mHeight = videoHeight * 0.65;
       mWidth = videoWidth * 0.45;
-    } else {
+    }*/ else {
       mHeight = videoHeight * 0.5;
       mWidth = videoWidth * 0.2;
     }
