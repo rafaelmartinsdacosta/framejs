@@ -449,6 +449,10 @@ const loadMask = async () => {
 
   let currentAspectRatio = 0;
 
+  if (mBoxWidth > videoHeight) {
+    videoOrientation = Orientation.LANDSCAPE;
+  }
+
   if (isMobile) {
     videoWidth = cameraVideo.offsetWidth;
     videoHeight = cameraVideo.offsetHeight;
