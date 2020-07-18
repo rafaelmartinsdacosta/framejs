@@ -640,7 +640,7 @@ const setOrientation = () => {
     }
   } else {
     // caso não exista, possivelmente Safari
-    if (screen.width > screen.height) {
+    if (boxCamera.offsetWidth > boxCamera.offsetHeight) {
       videoOrientation = Orientation.LANDSCAPE;
     } else {
       videoOrientation = Orientation.PORTRAIT;
