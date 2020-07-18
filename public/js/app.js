@@ -1,5 +1,6 @@
 // Configurações da stream de video
-let constraints = {
+let constraints = {};
+let constraintsBase = {
   video: {
     facingMode: 'user',
   },
@@ -20,6 +21,29 @@ let stream;
 let aspectRatio = 1280 / 720;
 let videoWidth = 0;
 let videoHeight = 0;
+// Opera 8.0+
+const isOpera = (!!window.opr && !!opr.addons) || !!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0;
+
+// Firefox 1.0+
+const isFirefox = typeof InstallTrigger !== 'undefined';
+
+// Safari 3.0+ "[object HTMLElementConstructor]" 
+const isSafari = /constructor/i.test(window.HTMLElement) || (function (p) { return p.toString() === "[object SafariRemoteNotification]"; })(!window['safari'] || (typeof safari !== 'undefined' && safari.pushNotification));
+
+// Internet Explorer 6-11
+const isIE = /*@cc_on!@*/false || !!document.documentMode;
+
+// Edge 20+
+const isEdge = !isIE && !!window.StyleMedia;
+
+// Chrome 1 - 79
+const isChrome = !!window.chrome && (!!window.chrome.webstore || !!window.chrome.runtime);
+
+// Edge (based on chromium) detection
+const isEdgeChromium = isChrome && (navigator.userAgent.indexOf("Edg") != -1);
+
+// Blink engine detection
+const isBlink = (isChrome || isOpera) && !!window.CSS;
 
 // video da abertura da câmera
 const cameraVideo = document.querySelector('#camera--video');
@@ -161,7 +185,12 @@ const startCamera = () => {
     (!constraints.video.width.exact || !constraints.video.width.min || !constraints.video.width.ideal || !constraints.video.width.max) ||
     (!constraints.video.height.exact || !constraints.video.height.min || !constraints.video.height.ideal || !constraints.video.height.max)
   ) {
-    Object.assign(constraints, defaultConstraints);
+    // configuração base
+    Object.assign(constraints, constraintsBase);
+    // exceto Safari
+    if (!isSafari) {
+      Object.assign(constraints, defaultConstraints);
+    }
     setConstraint(constraints);
   }
 
