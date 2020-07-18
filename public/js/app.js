@@ -357,6 +357,7 @@ const calcBtnCapturePos = async () => {
 
 const orientationChange = () => {
   setOrientation();
+  window.scrollTo(0,document.body.scrollHeight);
   updateView();
 };
 
@@ -479,8 +480,8 @@ const loadMask = async () => {
       mHeight = videoHeight * 0.5;
       mWidth = videoWidth * 0.55;
     } else if (isSafari) {
-      mHeight = videoHeight * 0.6;
-      mWidth = videoWidth * 0.3;
+      mHeight = videoHeight * 0.65;
+      mWidth = videoWidth * 0.45;
     } else {
       mHeight = videoHeight * 0.5;
       mWidth = videoWidth * 0.2;
