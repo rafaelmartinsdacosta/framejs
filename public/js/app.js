@@ -354,19 +354,25 @@ const calcBtnCapturePos = async () => {
 
 const orientationChange = () => {
   setOrientation();
+  updateView();
+};
+
+const updateView = () => {
+  if (cameraOpen) {
+    loadMask();
+  }
+  // has image ?
+  else if (cameraOutput.src !== '') {
+    resizeImageOut();
+  }
+  calcBtnCapturePos();
+  setMobileStyle();
 };
 
 const addEventResize = async () => {
   window.addEventListener('resize', (e) => {
-    if (cameraOpen) {
-      loadMask();
-    }
-    // has image ?
-    else if (cameraOutput.src !== '') {
-      resizeImageOut();
-    }
-    calcBtnCapturePos();
-    setMobileStyle();
+    setOrientation();
+    updateView();
   });
 };
 
@@ -447,11 +453,11 @@ const loadMask = async () => {
     videoWidth = cameraVideo.offsetWidth;
     videoHeight = cameraVideo.offsetHeight;
     if (videoOrientation == Orientation.LANDSCAPE) {
-      mHeight = videoHeight * (1 / 2);
-      mWidth = videoWidth * (1 / 5);
+      mHeight = videoHeight * 0.5;
+      mWidth = videoWidth * 0.18;
     } else {
-      mHeight = videoHeight * (1 / 2);
-      mWidth = videoWidth * (1 / 2);
+      mHeight = videoHeight * 0.5;
+      mWidth = videoWidth * 0.55;
     }
   } else {
     currentAspectRatio = cameraVideo.offsetWidth / cameraVideo.offsetHeight;
