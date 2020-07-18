@@ -22,25 +22,36 @@ let aspectRatio = 1280 / 720;
 let videoWidth = 0;
 let videoHeight = 0;
 // Opera 8.0+
-const isOpera = (!!window.opr && !!opr.addons) || !!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0;
+const isOpera =
+  (!!window.opr && !!opr.addons) ||
+  !!window.opera ||
+  navigator.userAgent.indexOf(' OPR/') >= 0;
 
 // Firefox 1.0+
 const isFirefox = typeof InstallTrigger !== 'undefined';
 
-// Safari 3.0+ "[object HTMLElementConstructor]" 
-const isSafari = /constructor/i.test(window.HTMLElement) || (function (p) { return p.toString() === "[object SafariRemoteNotification]"; })(!window['safari'] || (typeof safari !== 'undefined' && safari.pushNotification));
+// Safari 3.0+ "[object HTMLElementConstructor]"
+const isSafari =
+  /constructor/i.test(window.HTMLElement) ||
+  (function (p) {
+    return p.toString() === '[object SafariRemoteNotification]';
+  })(
+    !window['safari'] ||
+      (typeof safari !== 'undefined' && safari.pushNotification)
+  );
 
 // Internet Explorer 6-11
-const isIE = /*@cc_on!@*/false || !!document.documentMode;
+const isIE = /*@cc_on!@*/ false || !!document.documentMode;
 
 // Edge 20+
 const isEdge = !isIE && !!window.StyleMedia;
 
 // Chrome 1 - 79
-const isChrome = !!window.chrome && (!!window.chrome.webstore || !!window.chrome.runtime);
+const isChrome =
+  !!window.chrome && (!!window.chrome.webstore || !!window.chrome.runtime);
 
 // Edge (based on chromium) detection
-const isEdgeChromium = isChrome && (navigator.userAgent.indexOf("Edg") != -1);
+const isEdgeChromium = isChrome && navigator.userAgent.indexOf('Edg') != -1;
 
 // Blink engine detection
 const isBlink = (isChrome || isOpera) && !!window.CSS;
@@ -57,6 +68,15 @@ const buttonCapture = document.querySelector('#camera--trigger');
 const boxLoading = document.querySelector('#box--loading');
 // box da câmera
 const boxCamera = document.querySelector('#box-camera');
+
+const isMobile =
+  navigator.userAgent.match(/Android/i) ||
+  navigator.userAgent.match(/webOS/i) ||
+  navigator.userAgent.match(/iPhone/i) ||
+  navigator.userAgent.match(/iPad/i) ||
+  navigator.userAgent.match(/iPod/i) ||
+  navigator.userAgent.match(/BlackBerry/i) ||
+  navigator.userAgent.match(/Windows Phone/i);
 
 const Orientation = {
   PORTRAIT: 1,
@@ -95,7 +115,10 @@ const setTrack = (mediaStream) => {
   if (mediaStream) {
     track = mediaStream.getVideoTracks()[0];
     if (track.getSettings()) {
-      console.log('resolucao de abertura:', `${track.getSettings().width}x${track.getSettings().height}`);
+      console.log(
+        'resolucao de abertura:',
+        `${track.getSettings().width}x${track.getSettings().height}`
+      );
     }
     setConstraint(track.getConstraints());
   }
@@ -163,7 +186,7 @@ const handleError = (error) => {
 };
 
 const setMobileStyle = () => {
-  if (isMobile()) {
+  if (isMobile) {
     cameraVideo.style['object-fit'] = 'cover';
   } else {
     cameraVideo.style['object-fit'] = '';
@@ -182,8 +205,12 @@ const startCamera = () => {
     !constraints.video ||
     !constraints.video.width ||
     !constraints.video.height ||
-    (!constraints.video.width.exact || !constraints.video.width.min || !constraints.video.width.ideal || !constraints.video.width.max) ||
-    (!constraints.video.height.exact || !constraints.video.height.min || !constraints.video.height.ideal || !constraints.video.height.max)
+    !constraints.video.width.min ||
+    !constraints.video.width.ideal ||
+    !constraints.video.width.max ||
+    !constraints.video.height.min ||
+    !constraints.video.height.ideal ||
+    !constraints.video.height.max
   ) {
     // configuração base
     Object.assign(constraints, constraintsBase);
@@ -279,7 +306,7 @@ const setVisibilityAfterTake = () => {
 };
 
 const resizeImageOut = async () => {
-  if (isMobile()) {
+  if (isMobile) {
     cameraOutput.style.width = '100%';
     cameraOutput.style.height = '100%';
     cameraOutput.style['object-fit'] = 'cover';
@@ -323,21 +350,7 @@ const calcBtnCapturePos = async () => {
   buttonCapture.style.display = 'inline-block';
 };
 
-const isMobile = () => {
-  if (
-    navigator.userAgent.match(/Android/i) ||
-    navigator.userAgent.match(/webOS/i) ||
-    navigator.userAgent.match(/iPhone/i) ||
-    navigator.userAgent.match(/iPad/i) ||
-    navigator.userAgent.match(/iPod/i) ||
-    navigator.userAgent.match(/BlackBerry/i) ||
-    navigator.userAgent.match(/Windows Phone/i)
-  ) {
-    return true;
-  } else {
-    return false;
-  }
-};
+
 
 const orientationChange = () => {
   setOrientation();
@@ -430,7 +443,7 @@ const loadMask = async () => {
 
   let currentAspectRatio = 0;
 
-  if (isMobile()) {
+  if (isMobile) {
     videoWidth = cameraVideo.offsetWidth;
     videoHeight = cameraVideo.offsetHeight;
     if (videoOrientation == Orientation.LANDSCAPE) {
