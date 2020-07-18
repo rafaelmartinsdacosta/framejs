@@ -124,10 +124,6 @@ const setTrack = (mediaStream) => {
     if (track.getSettings()) {
       resolutionWidth = track.getSettings().width;
       resolutionHeight = track.getSettings().height;
-      console.log(
-        'resolucao de abertura:',
-        `${resolutionWidth}x${resolutionHeight}`
-      );
     }
     setConstraint(track.getConstraints());
   }
