@@ -70,6 +70,9 @@ const gotDevices = (deviceInfos) => {
 const setTrack = (mediaStream) => {
   if (mediaStream) {
     track = mediaStream.getVideoTracks()[0];
+    if (track.getSettings()) {
+      console.log('resolucao de abertura:', `${track.getSettings().width}x${track.getSettings().height}`);
+    }
     setConstraint(track.getConstraints());
   }
 };
@@ -155,10 +158,10 @@ const startCamera = () => {
     !constraints.video ||
     !constraints.video.width ||
     !constraints.video.height ||
-    !constraints.video.width.exact ||
-    !constraints.video.height.exact
+    (!constraints.video.width.exact || !constraints.video.width.min || !constraints.video.width.ideal || !constraints.video.width.max) ||
+    (!constraints.video.height.exact || !constraints.video.height.min || !constraints.video.height.ideal || !constraints.video.height.max)
   ) {
-    Object.assign(constraints, hdConstraints);
+    Object.assign(constraints, defaultConstraints);
     setConstraint(constraints);
   }
 
@@ -171,9 +174,6 @@ const startCamera = () => {
     .then(calcBtnCapturePos)
     .catch((error) => {
       handleError(error);
-      // abaixa a resolução de abertura da camera
-      setConstraint(vgaConstraints);
-      startCamera();
     });
 };
 
@@ -625,6 +625,21 @@ const getMedia = (constraints) => {
 
 const getConstraints = () => {
   return constraints;
+};
+
+const defaultConstraints = {
+  video: {
+    width: {
+      min: 640,
+      ideal: 1280,
+      max: 1920,
+    },
+    height: {
+      min: 480,
+      ideal: 720,
+      max: 1080,
+    },
+  },
 };
 
 const qvgaConstraints = {
