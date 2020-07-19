@@ -489,21 +489,27 @@ const loadMask = async () => {
     }
   }
 
-  // mask proportion
+  // ajusta o tamanho da máscara com base no video
+  // 300px referente a largura, usamos esse valor pois bate com a distância ocular ideal para biometria
+  // 480px referente a altura padrão de um rosto
+  let factorWidth = (videoWidth / resolutionWidth) * 300;
+  let factorHeight = (videoHeight / resolutionHeight) * 480;
+
   if (isMobile()) {
+    // no modo portrait levamos em conta a altura e calculamos a largura da máscara
+    // quando estamos simulando um dispositivo móvel no navegador a abertura da câmera sempre é landscape
+    // porém os lados são cortados no vídeo para dar a impressão de portrait
+    // por isso usamos a alttura como referência, por ser o valor real do video (sem cortes)
     if (videoOrientation == Orientation.PORTRAIT) {
-      mHeight = videoHeight * 0.5;
-      mWidth = videoWidth * 0.55;
-    } /*else if (isSafari) {
-      mHeight = videoHeight * 0.65;
-      mWidth = videoWidth * 0.45;
-    }*/ else {
-      mHeight = videoHeight * 0.5;
-      mWidth = videoWidth * 0.2;
+      mWidth = factorHeight / (480 / 300);
+      mHeight = factorHeight;
+    } else {
+      mWidth = factorWidth;
+      mHeight = factorHeight;
     }
   } else {
-    mHeight = videoHeight * 0.5;
-    mWidth = videoWidth * 0.2;
+    mWidth = factorWidth;
+    mHeight = factorHeight;
   }
 
   let exists = document.getElementById('svgMask') !== null;
