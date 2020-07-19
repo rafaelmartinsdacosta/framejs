@@ -613,6 +613,12 @@ body {
     height: 100%;
 }
 
+#camera-overlay {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+}
+
 #camera--output {
     transform: scaleX(-1);
     filter: FlipH;

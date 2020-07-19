@@ -25,6 +25,14 @@ let mWidth = 0;
 let mHeight = 0;
 let resolutionWidth = 1280;
 let resolutionHeight = 720;
+var subPath = window.location.pathname + '/';
+
+const TINY_FACE_DETECTOR = 'tiny_face_detector';
+// ssd_mobilenetv1 options
+let minConfidence = 0.5;
+// tiny_face_detector options
+let inputSize = 224;
+let scoreThreshold = 0.5;
 
 // Opera 8.0+
 const isOpera =
@@ -67,6 +75,8 @@ const cameraVideo = document.querySelector('#camera--video');
 const cameraOutput = document.querySelector('#camera--output');
 // canvas utilizado na captura
 const cameraCanvas = document.querySelector('#camera--canvas');
+// canvas overlay (landmarks)
+const cameraOverlay = document.querySelector('#camera-overlay');
 // botão de captura
 const buttonCapture = document.querySelector('#camera--trigger');
 // loading
@@ -395,12 +405,122 @@ const addEventResize = async () => {
   });
 };
 
+// -----------------------------------------
+// FACE-API.js  ----------------------------
+// -----------------------------------------
+
+const getAppPartURL = (strPart) => {
+  if (!subPath || subPath == '') {
+    subPath = '/';
+  }
+
+  if (strPart.length > 0) {
+    if (
+      strPart.toLowerCase().indexOf('http') > -1 ||
+      strPart.toLowerCase().indexOf('https') > -1
+    ) {
+      return strPart;
+    }
+
+    switch (strPart.substr(0, 1)) {
+      case '/':
+      case '.':
+      case '~':
+        strPart = strPart.replace(/\.\.|\~/, '');
+        strPart = strPart.replace(/\//, '');
+        break;
+    }
+
+    return (
+      window.location.protocol +
+      '//' +
+      (window.location.host + subPath + strPart)
+    );
+  } else {
+    return window.location.protocol + '//' + (window.location.host + subPath);
+  }
+};
+
+const downloadModels = async () => {
+  // load face detection and face landmark models
+  // await faceapi.loadFaceLandmarkModel('/');
+
+  Promise.all([
+    faceapi.nets.tinyFaceDetector.loadFromUri(getAppPartURL('/public/models')),
+    // faceapi.nets.faceLandmark68Net.loadFromUri(getAppPartURL('/models')),
+    //faceapi.nets.faceRecognitionNet.loadFromUri(getAppPartURL('/models')),
+    // faceapi.nets.faceExpressionNet.loadFromUri(getAppPartURL('/models'))
+  ])
+    .then((t) => {
+      // document.getElementById('result').innerHTML = '';
+      // document.getElementById('result').style.display = 'none';
+      // document.getElementById('init').style.display = 'block';
+      console.log('modelos carregados!');
+    })
+    .catch((error) => {
+      console.error('Não foi possível baixar os modelos', error);
+    });
+};
+
+const getFaceDetectorOptions = () => {
+  return new faceapi.TinyFaceDetectorOptions({ inputSize, scoreThreshold });
+};
+
+const isFaceDetectionModelLoaded = () => {
+  return !!faceapi.nets.tinyFaceDetector.params;
+};
+
+const updateTimeStats = (timeInMs) => {
+  forwardTimes = [timeInMs].concat(forwardTimes).slice(0, 30);
+  const avgTimeInMs =
+    forwardTimes.reduce((total, t) => total + t) / forwardTimes.length;
+  console.log(
+    `time: ${Math.round(avgTimeInMs)} ms - fps: ${faceapi.utils.round(
+      1000 / avgTimeInMs
+    )}`
+  );
+};
+
+const onPlay = async () => {
+  try {
+    if (
+      cameraVideo.paused ||
+      cameraVideo.ended ||
+      !isFaceDetectionModelLoaded()
+    ) {
+      return setTimeout(() => onPlay());
+    }
+
+    const options = getFaceDetectorOptions();
+    const ts = Date.now();
+    const result = await faceapi
+      .detectSingleFace(cameraVideo, options)
+      .withFaceLandmarks();
+
+    updateTimeStats(Date.now() - ts);
+
+    if (result) {
+      const dims = faceapi.matchDimensions(cameraOverlay, cameraVideo, true);
+      const resizedResult = faceapi.resizeResults(result, dims);
+
+      if (withBoxes) {
+        faceapi.draw.drawDetections(cameraOverlay, resizedResult);
+      }
+      faceapi.draw.drawFaceLandmarks(cameraOverlay, resizedResult);
+    }
+  } catch (error) {
+    console.error('Erro ao processar frame', error);
+  }
+};
+
+// -----------------------------------------
+// FACE-API.js  ----------------------------
+// -----------------------------------------
+
 const addEventPlay = () => {
   cameraVideo.addEventListener('play', () => {
     cameraOpen = true;
-    // add event after play video....
-
-    // faceapi.matchDimensions(canvas, displaySize);
+    onPlay();
 
     // setInterval(async() => {
     //     const detections = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceExpressions();
@@ -656,6 +776,7 @@ const loadMask = async () => {
 };
 
 const init = () => {
+  downloadModels();
   addClickEvent();
   setOrientation();
   addEventPlay();
@@ -721,72 +842,6 @@ const defaultConstraints = {
       min: 480,
       ideal: 720,
       max: 1080,
-    },
-  },
-};
-
-const qvgaConstraints = {
-  video: {
-    width: {
-      exact: 320,
-    },
-    height: {
-      exact: 240,
-    },
-  },
-};
-
-const vgaConstraints = {
-  video: {
-    width: {
-      exact: 640,
-    },
-    height: {
-      exact: 480,
-    },
-  },
-};
-
-const hdConstraints = {
-  video: {
-    width: {
-      exact: 1280,
-    },
-    height: {
-      exact: 720,
-    },
-  },
-};
-
-const fullHdConstraints = {
-  video: {
-    width: {
-      exact: 1920,
-    },
-    height: {
-      exact: 1080,
-    },
-  },
-};
-
-const fourKConstraints = {
-  video: {
-    width: {
-      exact: 4096,
-    },
-    height: {
-      exact: 2160,
-    },
-  },
-};
-
-const eightKConstraints = {
-  video: {
-    width: {
-      exact: 7680,
-    },
-    height: {
-      exact: 4320,
     },
   },
 };
