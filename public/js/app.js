@@ -442,19 +442,10 @@ const getAppPartURL = (strPart) => {
 };
 
 const downloadModels = async () => {
-  // load face detection and face landmark models
-  // await faceapi.loadFaceLandmarkModel('/');
-
   Promise.all([
     faceapi.nets.tinyFaceDetector.loadFromUri(getAppPartURL('/public/models')),
-    // faceapi.nets.faceLandmark68Net.loadFromUri(getAppPartURL('/models')),
-    //faceapi.nets.faceRecognitionNet.loadFromUri(getAppPartURL('/models')),
-    // faceapi.nets.faceExpressionNet.loadFromUri(getAppPartURL('/models'))
   ])
     .then((t) => {
-      // document.getElementById('result').innerHTML = '';
-      // document.getElementById('result').style.display = 'none';
-      // document.getElementById('init').style.display = 'block';
       console.log('modelos carregados!');
     })
     .catch((error) => {
@@ -521,57 +512,6 @@ const addEventPlay = () => {
   cameraVideo.addEventListener('play', () => {
     cameraOpen = true;
     onPlay();
-
-    // setInterval(async() => {
-    //     const detections = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceExpressions();
-    //     let resizedDetections;
-
-    //     if (detections) {
-    //         if (isOpenCamera) {
-    //             document.getElementById('dark').style.display = 'none';
-    //             document.getElementById('result').innerHTML = '';
-    //             document.getElementById('result').style.display = 'none';
-    //             isOpenCamera = false;
-    //         }
-
-    //         resizedDetections = faceapi.resizeResults(detections, displaySize);
-
-    //         if (resizedDetections) {
-    //             if (flow > 0) {
-    //                 if (totalSeconds === 0) {
-    //                     initTimer();
-    //                 }
-
-    //                 getBlinks(resizedDetections);
-
-    //                 validateBioWeb(
-    //                     resizedDetections.alignedRect._box._width,
-    //                     resizedDetections.alignedRect._box.left,
-    //                     resizedDetections.alignedRect._box.bottom
-    //                 );
-
-    //                 //falta deixar o número de ciclos corretos para mobile e para webcam levando em consideração o tempo do ciclo
-    //                 if (flow === 1 && countSuccess >= 6) {
-    //                     takePictureNear();
-    //                     countSuccess === 0;
-    //                 } else if (flow === 2 && countSuccess > 5) {
-    //                     //melhor precisão em capturar os ciclos do sorriso
-    //                     if (detections.expressions.happy * 100 > 95) {
-    //                         setTimeout(takePictureFar(), 200);
-    //                         countSuccess === 0;
-    //                         flow = 0;
-    //                     }
-    //                 }
-    //             }
-
-    //             //canvas.getContext('2d').scale(-1, 1);
-    //             //canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
-    //             //faceapi.draw.drawDetections(canvas, resizedDetections);
-    //             //faceapi.draw.drawFaceLandmarks(canvas, resizedDetections);
-    //             //faceapi.draw.drawFaceExpressions(canvas, resizedDetections);
-    //         }
-    //     }
-    // }, 350);
   });
 };
 
