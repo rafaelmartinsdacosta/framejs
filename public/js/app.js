@@ -443,7 +443,8 @@ const getAppPartURL = (strPart) => {
 
 const downloadModels = async () => {
   Promise.all([
-    faceapi.nets.tinyFaceDetector.loadFromUri(getAppPartURL('/public/models')),
+    faceapi.loadTinyFaceDetectorModel(getAppPartURL('/public/models')),
+    faceapi.loadFaceLandmarkModel(getAppPartURL('/public/models')),
   ])
     .then((t) => {
       console.log('modelos carregados!');
