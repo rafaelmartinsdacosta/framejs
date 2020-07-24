@@ -495,6 +495,7 @@ const onPlay = async () => {
     if (result) {
       const dims = faceapi.matchDimensions(cameraOverlay, cameraVideo, true);
       const resizedResult = faceapi.resizeResults(result, dims);
+      faceapi.draw.drawDetections(cameraOverlay, resizedResult);
       faceapi.draw.drawFaceLandmarks(cameraOverlay, resizedResult);
     }
     setTimeout(() => onPlay());
