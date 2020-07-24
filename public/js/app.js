@@ -244,6 +244,7 @@ const startCamera = () => {
     .then(gotDevices)
     .then(loadMask)
     .then(calcBtnCapturePos)
+    .then(calcMarginMask)
     .catch((error) => {
       handleError(error);
     });
@@ -381,6 +382,13 @@ const calcBtnCapturePos = async () => {
   buttonCapture.style.display = 'inline-block';
 };
 
+const calcMarginMask = async () => {
+  // diferença entre o video e a area visivel (na web fica com a faixa preta caso ultrapasse a area do video)
+  let diff = boxCamera.offsetHeight - videoHeight;
+  let padding = diff > 0 ? diff / 2 : 0;
+  cameraOverlay.style.padding = `${padding}px 0px`;
+};
+
 const orientationChange = () => {
   setOrientation();
   window.scrollTo(0, document.body.scrollHeight);
@@ -396,6 +404,7 @@ const updateView = () => {
     resizeImageOut();
   }
   calcBtnCapturePos();
+  calcMarginMask();
   setMobileStyle();
 };
 
