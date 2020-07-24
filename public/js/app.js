@@ -77,7 +77,7 @@ const cameraOutput = document.querySelector('#camera--output');
 // canvas utilizado na captura
 const cameraCanvas = document.querySelector('#camera--canvas');
 // canvas overlay (landmarks)
-const cameraOverlay = document.querySelector('#camera-overlay');
+const cameraOverlay = document.querySelector('#camera--overlay');
 // botão de captura
 const buttonCapture = document.querySelector('#camera--trigger');
 // loading
@@ -497,6 +497,7 @@ const onPlay = async () => {
       const resizedResult = faceapi.resizeResults(result, dims);
       faceapi.draw.drawFaceLandmarks(cameraOverlay, resizedResult);
     }
+    setTimeout(() => onPlay());
   } catch (error) {
     console.error('Erro ao processar frame', error);
   }
