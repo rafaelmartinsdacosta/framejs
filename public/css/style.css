@@ -588,6 +588,7 @@ body {
 }
 
 #camera--overlay {
+  transform: scaleX(-1);
   position: absolute;
   top: 0px;
   left: 0px;
