@@ -26,6 +26,7 @@ let mHeight = 0;
 let resolutionWidth = 1280;
 let resolutionHeight = 720;
 var subPath = window.location.pathname + '/';
+let forwardTimes = [];
 
 const TINY_FACE_DETECTOR = 'tiny_face_detector';
 // ssd_mobilenetv1 options
